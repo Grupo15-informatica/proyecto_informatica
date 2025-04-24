@@ -122,6 +122,45 @@ def addsegment(g):
             fig.canvas.mpl_disconnect(cid)  # Quitamos el evento para evitar más clics
             plot(G)  # Redibujar con el nuevo segmento
     cid = fig.canvas.mpl_connect('button_press_event', on_click)
+def eliminar(g):
+    def on_click4(event):
+        if event.xdata is not None and event.ydata is not None:
+            x, y = float(event.xdata), float(event.ydata)
+            a = GetClosest(G, x, y).nombre
+            c=GetClosest(G,x,y).x
+            i=0
+            found=False
+            while i<len(g.nodes) and not found:
+                if g.nodes[i].nombre==a:
+                    del g.nodes[i]
+                    found=True
+                i=i+1
+            i=0
+            while i<len(g.segments):
+                if g.segments[i].origen.nombre==a:
+                    del g.segments[i]
+                    i=i-1
+                    print('correctoOrigen')
+                i=i+1
+            i = 0
+            while i < len(g.segments):
+                if g.segments[i].destino.nombre == a:
+                    del g.segments[i]
+                    i=i-1
+                    print('correctoDestino')
+                i=i+1
+        fig,ax=plot(g)
+        canvas = FigureCanvasTkAgg(fig, master=picture_frame)
+        canvas.draw()
+        if 'canvas_picture' in globals():
+            canvas_picture.grid_forget()
+        canvas_picture = canvas.get_tk_widget()
+        canvas_picture.config(width=600, height=400)
+        canvas_picture.grid(row=0, column=0, padx=5, pady=5,
+                            sticky=tk.N + tk.E + tk.W + tk.S)
+    fig, ax = plot(g)
+    messagebox.showinfo("Información", "Clica en el nodo que quieras eliminar")
+    fig.canvas.mpl_connect('button_press_event', on_click4)
 
 #BASES DE LA ESTRUCTURA DEL TKINTER:
 root=tk.Tk()
@@ -165,7 +204,7 @@ button3=tk.Button(button_graphs_frame,text='Añadir nodo',command=lambda:addnode
 button3.grid(row=0,column=0,padx=5,pady=5,sticky=tk.N+tk.E+tk.W+tk.S)
 button4=tk.Button(button_graphs_frame,text='Añadir segmento',command=lambda:addsegment(G))
 button4.grid(row=1,column=0,padx=5,pady=5,sticky=tk.N+tk.E+tk.W+tk.S)
-button5=tk.Button(button_graphs_frame,text='Eliminar nodo y sus segmentos')
+button5=tk.Button(button_graphs_frame,text='Eliminar nodo y sus segmentos',command=lambda:eliminar(G))
 button5.grid(row=2,column=0,padx=5,pady=5,sticky=tk.N+tk.E+tk.W+tk.S)
 button6=tk.Button(button_graphs_frame,text='Guardar gráfico en un archivo')
 button6.grid(row=3,column=0,padx=5,pady=5,sticky=tk.N+tk.E+tk.W+tk.S)
