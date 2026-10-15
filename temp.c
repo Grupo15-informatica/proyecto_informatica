@@ -32,7 +32,6 @@ void *AtenderCliente(void *socket)
 		peticion[ret] = '\0';
 		printf("Peticion recibida: %s\n", peticion);
 
-		// Descomponer petición: codigo/numForm/temperatura
 		char *p = strtok(peticion, "/");
 		int codigo = atoi(p);
 		int numForm = 0;
@@ -47,30 +46,27 @@ void *AtenderCliente(void *socket)
 			if (p != NULL) valor = atof(p);
 		}
 
-		// Procesar servicios
-		if (codigo == 0) // Desconexión
+		if (codigo == 0)
 		{
 			terminar = 1;
 		}
-		else if (codigo == 1) // Celsius a Fahrenheit
+		else if (codigo == 1)
 		{
 			float fahrenheit = (valor * 9.0 / 5.0) + 32.0;
 			sprintf(respuesta, "1/%d/%.2f", numForm, fahrenheit);
 		}
-		else if (codigo == 2) // Fahrenheit a Celsius
+		else if (codigo == 2)
 		{
 			float celsius = (valor - 32.0) * 5.0 / 9.0;
 			sprintf(respuesta, "2/%d/%.2f", numForm, celsius);
 		}
 
-		// Enviar respuesta al cliente que la solicitó
 		if (codigo != 0)
 		{
 			printf("Respuesta: %s\n", respuesta);
 			write(sock_conn, respuesta, strlen(respuesta));
 		}
 
-		// Notificar incremento del contador global a todos los clientes
 		if (codigo == 1 || codigo == 2)
 		{
 			pthread_mutex_lock(&mutex);
