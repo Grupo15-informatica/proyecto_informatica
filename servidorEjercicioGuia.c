@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <ctype.h>
 
 int contador;
 
@@ -81,7 +82,49 @@ void *AtenderCliente (void *socket)
 				else
 					sprintf (respuesta, "3/%d/%s: eres bajo",numForm, nombre);
 			}
+
+		// AQUI EMPIEZO MI AÑADICION
+		
+			else if (codigo == 6) // RETO 1a: Comprobar si es palíndromo
+			{
+			    char nombre_lower[20];
+			    int len = strlen(nombre);
+			    int es_palindromo = 1;
 			
+			    // Convertimos a minúsculas para ignorar diferencias entre 'A' y 'a'
+			    for (int k = 0; k < len; k++) {
+			        nombre_lower[k] = tolower(nombre[k]);
+			    }
+			    nombre_lower[len] = '\0';
+			
+			    // Comprobamos si se lee igual de izquierda a derecha que de derecha a izquierda
+			    for (int k = 0; k < len / 2; k++) {
+			        if (nombre_lower[k] != nombre_lower[len - 1 - k]) {
+			            es_palindromo = 0;
+			            break;
+			        }
+			    }
+			
+			    if (es_palindromo)
+			        sprintf(respuesta, "6/%d/SI", numForm);
+			    else
+			        sprintf(respuesta, "6/%d/NO", numForm);
+			}
+			else if (codigo == 7) // RETO 1b: Convertir nombre a mayúsculas
+			{
+			    char nombre_mayus[20];
+			    int len = strlen(nombre);
+			
+			    for (int k = 0; k < len; k++) {
+			        nombre_mayus[k] = toupper(nombre[k]);
+			    }
+			    nombre_mayus[len] = '\0';
+			
+			    sprintf(respuesta, "7/%d/%s", numForm, nombre_mayus);
+			}
+
+		// FIN DE MI AÑADICION
+		
 			if (codigo !=0)
 			{
 				
@@ -89,7 +132,7 @@ void *AtenderCliente (void *socket)
 				// Enviamos respuesta
 				write (sock_conn,respuesta, strlen(respuesta));
 			}
-			if ((codigo ==1)||(codigo==2)|| (codigo==3))
+			if ((codigo == 1) || (codigo == 2) || (codigo == 3) || (codigo == 6) || (codigo == 7))
 			{
 				pthread_mutex_lock( &mutex ); //No me interrumpas ahora
 				contador = contador +1;
