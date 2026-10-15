@@ -63,65 +63,95 @@ void *AtenderCliente (void *socket)
 			printf ("Codigo: %d, Nombre: %s\n", codigo, nombre);
 		}
 		
-		if (codigo ==0) //petici?n de desconexi?n
-			terminar=1;
-		else if (codigo ==1) //piden la longitd del nombre
-			sprintf (respuesta,"1/%d/%d",numForm,strlen (nombre));
-		else if (codigo ==2)
-			// quieren saber si el nombre es bonito
-			if((nombre[0]=='M') || (nombre[0]=='S'))
-			sprintf (respuesta,"2/%d/SI", numForm);
+		if (codigo == 0) // Petición de desconexión
+		{
+			terminar = 1;
+		}
+		else if (codigo == 1) // Piden la longitud del nombre
+		{
+			sprintf(respuesta, "1/%d/%d", numForm, (int)strlen(nombre));
+		}
+		else if (codigo == 2) // Quieren saber si el nombre es bonito
+		{
+			if ((nombre[0] == 'M') || (nombre[0] == 'S'))
+				sprintf(respuesta, "2/%d/SI", numForm);
 			else
-				sprintf (respuesta,"2/%d/NO", numForm);
-			else //quiere saber si es alto
+				sprintf(respuesta, "2/%d/NO", numForm);
+		}
+		else if (codigo == 3) // Quiere saber si es alto
+		{
+			p = strtok(NULL, "/");
+			float altura = atof(p);
+			if (altura > 1.70)
+				sprintf(respuesta, "3/%d/%s: eres alto", numForm, nombre);
+			else
+				sprintf(respuesta, "3/%d/%s: eres bajo", numForm, nombre);
+		}
+		else if (codigo == 5) // Código del vídeo: Mayores de edad
+		{
+			char lista_mayores[512] = "";
+			char temp_nombre[20];
+			int edad;
+
+			strcpy(temp_nombre, nombre);
+
+			while (p != NULL)
 			{
-				p = strtok( NULL, "/");
-				float altura =  atof (p);
-				if (altura > 1.70)
-					sprintf (respuesta, "3/%d/%s: eres alto",numForm,nombre);
-				else
-					sprintf (respuesta, "3/%d/%s: eres bajo",numForm, nombre);
+				p = strtok(NULL, "/");
+				if (p != NULL)
+				{
+					edad = atoi(p);
+					if (edad > 18) {
+						sprintf(lista_mayores, "%s%s*%d-", lista_mayores, temp_nombre, edad);
+					}
+					p = strtok(NULL, "/");
+					if (p != NULL) {
+						strcpy(temp_nombre, p);
+					}
+				}
 			}
 
-		// AQUI EMPIEZO MI AÑADICION
-		
-			else if (codigo == 6) // RETO 1a: Comprobar si es palíndromo
-			{
-			    char nombre_lower[20];
-			    int len = strlen(nombre);
-			    int es_palindromo = 1;
-			
-			    // Convertimos a minúsculas para ignorar diferencias entre 'A' y 'a'
-			    for (int k = 0; k < len; k++) {
-			        nombre_lower[k] = tolower(nombre[k]);
-			    }
-			    nombre_lower[len] = '\0';
-			
-			    // Comprobamos si se lee igual de izquierda a derecha que de derecha a izquierda
-			    for (int k = 0; k < len / 2; k++) {
-			        if (nombre_lower[k] != nombre_lower[len - 1 - k]) {
-			            es_palindromo = 0;
-			            break;
-			        }
-			    }
-			
-			    if (es_palindromo)
-			        sprintf(respuesta, "6/%d/SI", numForm);
-			    else
-			        sprintf(respuesta, "6/%d/NO", numForm);
+			if (strlen(lista_mayores) > 0) {
+				lista_mayores[strlen(lista_mayores) - 1] = '\0';
 			}
-			else if (codigo == 7) // RETO 1b: Convertir nombre a mayúsculas
-			{
-			    char nombre_mayus[20];
-			    int len = strlen(nombre);
-			
-			    for (int k = 0; k < len; k++) {
-			        nombre_mayus[k] = toupper(nombre[k]);
-			    }
-			    nombre_mayus[len] = '\0';
-			
-			    sprintf(respuesta, "7/%d/%s", numForm, nombre_mayus);
+
+			sprintf(respuesta, "5/%d/%s", numForm, lista_mayores);
+		}
+		else if (codigo == 6) // RETO 1a: Palíndromo
+		{
+			char nombre_lower[20];
+			int len = strlen(nombre);
+			int es_palindromo = 1;
+
+			for (int k = 0; k < len; k++) {
+				nombre_lower[k] = tolower(nombre[k]);
 			}
+			nombre_lower[len] = '\0';
+
+			for (int k = 0; k < len / 2; k++) {
+				if (nombre_lower[k] != nombre_lower[len - 1 - k]) {
+					es_palindromo = 0;
+					break;
+				}
+			}
+
+			if (es_palindromo)
+				sprintf(respuesta, "6/%d/SI", numForm);
+			else
+				sprintf(respuesta, "6/%d/NO", numForm);
+		}
+		else if (codigo == 7) // RETO 1b: Nombre en Mayúsculas
+		{
+			char nombre_mayus[20];
+			int len = strlen(nombre);
+
+			for (int k = 0; k < len; k++) {
+				nombre_mayus[k] = toupper(nombre[k]);
+			}
+			nombre_mayus[len] = '\0';
+
+			sprintf(respuesta, "7/%d/%s", numForm, nombre_mayus);
+		}
 
 		// FIN DE MI AÑADICION
 		
