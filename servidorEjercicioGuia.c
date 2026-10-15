@@ -63,31 +63,27 @@ void *AtenderCliente (void *socket)
 			printf ("Codigo: %d, Nombre: %s\n", codigo, nombre);
 		}
 		
-		if (codigo == 0) // Petición de desconexión
+		if (codigo ==0) //petici?n de desconexi?n
+			terminar=1;
+		else if (codigo ==1) //piden la longitd del nombre
+			sprintf (respuesta,"1/%d/%d",numForm,strlen (nombre));
+		else if (codigo ==2) // quieren saber si el nombre es bonito
 		{
-			terminar = 1;
-		}
-		else if (codigo == 1) // Piden la longitud del nombre
-		{
-			sprintf(respuesta, "1/%d/%d", numForm, (int)strlen(nombre));
-		}
-		else if (codigo == 2) // Quieren saber si el nombre es bonito
-		{
-			if ((nombre[0] == 'M') || (nombre[0] == 'S'))
-				sprintf(respuesta, "2/%d/SI", numForm);
+			if((nombre[0]=='M') || (nombre[0]=='S'))
+				sprintf (respuesta,"2/%d/SI", numForm);
 			else
-				sprintf(respuesta, "2/%d/NO", numForm);
+				sprintf (respuesta,"2/%d/NO", numForm);
 		}
-		else if (codigo == 3) // Quiere saber si es alto
+		else if (codigo ==3) //quiere saber si es alto
 		{
-			p = strtok(NULL, "/");
-			float altura = atof(p);
+			p = strtok( NULL, "/");
+			float altura =  atof (p);
 			if (altura > 1.70)
-				sprintf(respuesta, "3/%d/%s: eres alto", numForm, nombre);
+				sprintf (respuesta, "3/%d/%s: eres alto",numForm,nombre);
 			else
-				sprintf(respuesta, "3/%d/%s: eres bajo", numForm, nombre);
+				sprintf (respuesta, "3/%d/%s: eres bajo",numForm, nombre);
 		}
-		else if (codigo == 5) // Código del vídeo: Mayores de edad
+		else if (codigo == 5) // Servicio Mayores de edad (Vídeo)
 		{
 			char lista_mayores[512] = "";
 			char temp_nombre[20];
@@ -140,7 +136,7 @@ void *AtenderCliente (void *socket)
 			else
 				sprintf(respuesta, "6/%d/NO", numForm);
 		}
-		else if (codigo == 7) // RETO 1b: Nombre en Mayúsculas
+		else if (codigo == 7) // RETO 1b: Nombre en mayúsculas
 		{
 			char nombre_mayus[20];
 			int len = strlen(nombre);
@@ -152,29 +148,26 @@ void *AtenderCliente (void *socket)
 
 			sprintf(respuesta, "7/%d/%s", numForm, nombre_mayus);
 		}
-
-		// FIN DE MI AÑADICION
-		
-			if (codigo !=0)
-			{
-				
-				printf ("Respuesta: %s\n", respuesta);
-				// Enviamos respuesta
-				write (sock_conn,respuesta, strlen(respuesta));
-			}
-			if ((codigo == 1) || (codigo == 2) || (codigo == 3) || (codigo == 6) || (codigo == 7))
-			{
-				pthread_mutex_lock( &mutex ); //No me interrumpas ahora
-				contador = contador +1;
-				pthread_mutex_unlock( &mutex); //ya puedes interrumpirme
-				// notificar a todos los clientes conectados
-				char notificacion[20];
-				sprintf (notificacion, "4/%d",contador);
-				int j;
-				for (j=0; j< i; j++)
-					write (sockets[j],notificacion, strlen(notificacion));
-				
-			}
+			
+		if (codigo !=0)
+		{
+			printf ("Respuesta: %s\n", respuesta);
+			// Enviamos respuesta
+			write (sock_conn,respuesta, strlen(respuesta));
+		}
+		if ((codigo ==1)||(codigo==2)||(codigo==3)||(codigo==5)||(codigo==6)||(codigo==7))
+		{
+			pthread_mutex_lock( &mutex ); //No me interrumpas ahora
+			contador = contador +1;
+			pthread_mutex_unlock( &mutex); //ya puedes interrumpirme
+			// notificar a todos los clientes conectados
+			char notificacion[20];
+			sprintf (notificacion, "4/%d",contador);
+			int j;
+			for (j=0; j< i; j++)
+				write (sockets[j],notificacion, strlen(notificacion));
+			
+		}
 			
 	}
 	// Se acabo el servicio para este cliente
